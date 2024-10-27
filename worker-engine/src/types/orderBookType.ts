@@ -1,22 +1,23 @@
-export interface OrdersType {
-  [quantity: string]: {
-    [userId: string]: "buy" | "sell";
-  };
-}
-
 export interface Order {
+  quantity: number;
+  userId: string;
+  type: "buy" | "sell";
+}
+
+export interface PriceLevel {
   total: number;
-  orders: OrdersType;
+  orders: Order[];
 }
 
-interface PredictionOrders {
-  [price: string]: Order;
+interface TokenType {
+  [price: string]: PriceLevel;
 }
 
-interface PredictionBook {
-  [stockType: string]: PredictionOrders;
+interface Symbol {
+  yes: TokenType;
+  no: TokenType;
 }
 
 export interface OrderBook {
-  [stockSymbol: string]: PredictionBook;
+  [symbol: string]: Symbol;
 }

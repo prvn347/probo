@@ -8,12 +8,14 @@ const users: {
     ws: any;
   };
 } = {};
+
 const event: {
   [key: string]: { users: string[]; host?: string };
 } = {};
 
 const client = createClient();
 let counter = 0;
+
 const wss = new WebSocketServer({ port: 8080 });
 
 const startServer = async () => {
@@ -21,23 +23,16 @@ const startServer = async () => {
   client.on("error", (err) => console.log("Redis Client Error", err));
 
   console.log("Connected to redis");
-  while (true) {
-    try {
-      const orders = await client.brPop("orders", 0);
-      console.log("order popped");
-      // @ts-ignore
-      const elementData = orders.element;
-      const { eventId } = JSON.parse(elementData);
-      const data = JSON.stringify({
-        eventId: eventId,
-        elementData,
-      });
-      broadcastToEvent(eventId, data);
 
+  try {
+    await client.subscribe("order", (message) => {
+      const { eventId, data } = JSON.parse(message);
+      broadcastToEvent(eventId, { eventId, data });
+      console.log("comming data in ws is " + message);
       console.log(`Finished processing order for eventId ${eventId}.`);
-    } catch (error) {
-      console.error("Error processing orders:", error);
-    }
+    });
+  } catch (error) {
+    console.error("Error processing orders:", error);
   }
 };
 
@@ -53,26 +48,29 @@ wss.on("connection", async function connection(ws: WebSocket, client: any) {
       const params = data.params;
 
       switch (type) {
-        case "join":
-          joinRoom(ws, params, userWSId);
+        case "subscribe":
+          subscribeToEvent(ws, params, userWSId);
+          break;
         case "sell":
           broadcastToRoom(ws, message, userWSId);
+          break;
 
         case "leave":
-          leaveRoom(userWSId, ws);
+          unsubscribeToEvent(userWSId, ws);
+          break;
       }
     } catch (error) {
       console.error(error);
     }
   });
 
-  ws.send("connected");
+  ws.send("conn/ected");
   ws.on("close", () => {
-    leaveRoom(userWSId, ws);
+    unsubscribeToEvent(userWSId, ws);
   });
 });
 
-const joinRoom = (
+const subscribeToEvent = (
   ws: WebSocket,
   params: { userId: string; eventId: string },
   userWsId: number
@@ -93,12 +91,12 @@ const joinRoom = (
       users: event[params.eventId].users,
     };
 
-    broadcastToRoom(ws, message, userWsId, true);
+    // broadcastToRoom(ws, message, userWsId, true);
   } catch (error) {
     console.log(error);
   }
 };
-function leaveRoom(wsId: number, ws: WebSocket) {
+function unsubscribeToEvent(wsId: number, ws: WebSocket) {
   const user = users[wsId];
   if (user) {
     const { eventId, userId } = user;
@@ -118,7 +116,7 @@ function leaveRoom(wsId: number, ws: WebSocket) {
       // host: event[eventId].host,
     };
 
-    broadcastToRoom(user.ws, message, wsId, true);
+    // broadcastToRoom(user.ws, message, wsId, true);
 
     // Remove user from users object
     delete users[wsId];
@@ -144,6 +142,7 @@ function broadcastToRoom(
 
     if (!users || !users[userWsId]) return;
 
+    if (!eventId) return;
     Object.keys(users).forEach((wsId) => {
       if (
         users[wsId].eventId === eventId &&

@@ -21,6 +21,9 @@ export class redisManager {
     return this.instance;
   }
 
+  public pushToDb(data: { type: string; data: any }) {
+    this.client.lPush("db_processor", JSON.stringify(data));
+  }
   public sendAndAwait(data: any, clientId: string) {
     return new Promise<{ clientId: string; responseData: any }>((resolve) => {
       const id = clientId;

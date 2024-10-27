@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "path": "trade-ws-server"
+    },
+    {
+      "path": "trading-server"
+    },
+    {
+      "path": "worker-engine"
+    },
+    {
+      "path": "go-engine"
+    },
+    {
+      "path": "db-server"
+    }
+  ],
+  "settings": {}
+}
