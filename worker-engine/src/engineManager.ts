@@ -535,20 +535,7 @@ export class engineManager {
 
       let remainingQuantity = userData.quantity;
       const buyOrderId = this.generateOrderId();
-      const buyOrderMessage: DBmessage = {
-        type: "BUY_ORDER",
-        data: {
-          id: buyOrderId,
-          userId: userData.userId,
-          marketId: userData.stockSymbol,
-          side: userData.stockType,
-          type: "buy",
-          quantity: userData.quantity,
-          price: userData.price,
-          filled_quantity: 0,
-        },
-      };
-      this.pushToDb(buyOrderMessage);
+
       let totalSpent = 0;
       const oppositeSide = userData.stockType === "yes" ? "no" : "yes";
       const oppositePrice = 1000 - userData.price;
@@ -583,19 +570,6 @@ export class engineManager {
             const sellerUserId = sellOrder.userId;
             const orderType = sellOrder.type;
 
-            const tradeMessage: DBmessage = {
-              type: "TRADE",
-              data: {
-                buyOrderId: buyOrderId,
-                sellOrderId: sellOrder.id, // Make sure to store order IDs in the orderbook
-                price: i,
-                quantity: Math.min(executedQuantity, sellOrder.quantity),
-                marketId: userData.stockSymbol,
-                buyerId: userData.userId,
-                sellerId: sellOrder.userId,
-              },
-            };
-            this.pushToDb(tradeMessage);
             this.initializeStockBalance(sellerUserId, userData.stockSymbol);
 
             if (numSellOrderQuantity <= executedQuantity) {
@@ -683,15 +657,35 @@ export class engineManager {
           userId: userData.userId,
           type: "buy",
         });
-        const remainingOrderMessage: DBmessage = {
+        const buyOrderMessage: DBmessage = {
           type: "BUY_ORDER",
           data: {
             id: buyOrderId,
-            filled_quantity: userData.quantity - remainingQuantity,
+            userId: userData.userId,
+            marketId: userData.stockSymbol,
+            side: userData.stockType,
+            type: "sell",
+            quantity: userData.quantity,
+            price: userData.price,
+            executed_quantity: userData.quantity - remainingQuantity,
           },
         };
-        this.pushToDb(remainingOrderMessage);
-        // The funds for the remaining quantity are already locked, so no need to lock again
+        this.pushToDb(buyOrderMessage);
+      } else {
+        const buyOrderMessage: DBmessage = {
+          type: "BUY_ORDER",
+          data: {
+            id: buyOrderId,
+            userId: userData.userId,
+            marketId: userData.stockSymbol,
+            side: userData.stockType,
+            type: "buy",
+            quantity: userData.quantity,
+            price: userData.price,
+            executed_quantity: userData.quantity - remainingQuantity,
+          },
+        };
+        this.pushToDb(buyOrderMessage);
       }
 
       return {

@@ -20,12 +20,4 @@ export class orderbookControllers {
       console.error(error);
     }
   }
-
-  async createTrade(tradeData: tradeType) {
-    try {
-      return await this.orderbookService.createTrade(tradeData);
-    } catch (error) {
-      console.error(error);
-    }
-  }
 }

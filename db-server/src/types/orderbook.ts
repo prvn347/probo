@@ -6,7 +6,7 @@ export type sellOrderType = {
   type: string;
   quantity: number;
   price: number;
-  filled_quantity?: number;
+  executed_quantity?: number;
 };
 
 export type tradeType = {

@@ -41,9 +41,6 @@ export class engineManager {
       case "BUY_ORDER":
         this.orderbookController.createBuyOrder(dbResponse.data);
         break;
-      case "TRADE":
-        this.orderbookController.createTrade(dbResponse.data);
-        break;
     }
   }
 }

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,50 +8,40 @@ datasource db {
 }
 
 model User {
-  id String @id @unique
-  username String @unique
+  id          String        @id @unique @default(cuid())
+  username    String        @unique
 
 }
 
 model Market {
-  id String @id 
-  symbol String @unique
-  endTime DateTime
-  description String
+  id            String   @id
+  symbol        String   @unique
+  endTime       DateTime
+  description   String
   sourceOfTruth String
-  category Category @relation(fields: [categoryId],references: [id])
-  categoryId String @unique
-  createdAt DateTime @default(now())
-
+  categoryId    String   @unique
+  createdAt     DateTime @default(now())
+  category      Category @relation(fields: [categoryId], references: [id])
 }
 
 model Category {
-  id String @id 
-  title  String
-  icon String
+  id          String   @id
+  title       String
+  icon        String
   description String
-  createdAt DateTime @default(now())
-  Markets Market[]
+  createdAt   DateTime @default(now())
+  Markets     Market?
 }
 
-model Order {
-  id  String @id
-  userId String @unique
-  marketId String @unique
-  side String
-  type String
-  quantity Int
-  price Int
-  filled_quantity Int?
-  timestamp DateTime @default(now())
-  
-}
+model Transaction {
+  id               String   @id @default(cuid())
+  userId           String
+  marketId         String
+  side             String
+  type             String
+  quantity         Int
+  price            Int
+  executed_qantity Int?
+  timestamp        DateTime @default(now())
 
-model Trade {
-  id         String  @id 
-  buyOrderId String
-  sellOrderId String
- 
-  price      Int
-  timestamp  DateTime @default(now())
 }
