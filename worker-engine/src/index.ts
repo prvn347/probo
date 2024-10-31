@@ -2,7 +2,9 @@ import { createClient } from "redis";
 import { engineManager } from "./engineManager";
 
 const startEngine = async () => {
-  const client = createClient();
+  const client = createClient({
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  });
   await client.connect();
   client.on("error", (error) => {
     console.log("Error in redis connection" + error);

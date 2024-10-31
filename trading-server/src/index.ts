@@ -17,6 +17,9 @@ let INR_BALANCES: userBalanceType = {
 let ORDERBOOK: OrderBook = {};
 let STOCK_BALANCES: stockBalance = {};
 
+app.get("/ping", (req, res) => {
+  res.send("PONG");
+});
 app.post("/reset", async (req, res) => {
   try {
     const clientId = uuidv4();

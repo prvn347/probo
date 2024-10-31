@@ -3,7 +3,9 @@ import { engineManager } from "./engine";
 import { dbResponseType } from "./types";
 
 const dbProcessor = async () => {
-  const client = createClient();
+  const client = createClient({
+    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  });
   await client.connect();
   client.on("error", (error) => {
     console.log("Error in redis connection" + error);
