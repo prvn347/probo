@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ws-redis-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ws-redis-backend
+  template:
+    metadata:
+      labels:
+        app: ws-redis-backend
+    spec:
+      containers:
+        - name: ws-backend
+          image: prvn347/trade-ws-server:latest
+          ports:
+            - containerPort: 8080
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
