@@ -10,9 +10,6 @@
       "path": "worker-engine"
     },
     {
-      "path": "go-engine"
-    },
-    {
       "path": "db-server"
     },
     {

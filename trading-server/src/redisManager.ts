@@ -8,13 +8,15 @@ export class redisManager {
   private static instance: redisManager;
 
   constructor() {
-    this.client = createClient({
-      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    });
+    this.client = createClient();
+    //   {
+    //   url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    // }
     this.client.connect();
-    this.publisher = createClient({
-      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-    });
+    this.publisher = createClient();
+    //   {
+    //   url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    // }
     this.publisher.connect();
   }
 
@@ -25,9 +27,6 @@ export class redisManager {
     return this.instance;
   }
 
-  public pushToDb(data: { type: string; data: any }) {
-    this.client.lPush("db_processor", JSON.stringify(data));
-  }
   public sendAndAwait(data: any, clientId: string) {
     return new Promise<{ clientId: string; responseData: any }>((resolve) => {
       const id = clientId;
@@ -37,5 +36,21 @@ export class redisManager {
       });
       this.publisher.lPush("message", JSON.stringify(data));
     });
+  }
+  public sendToDb_processor(message: any) {
+    return new Promise<any>((resolve) => {
+      const id = this.getRandomClientId();
+      this.client.subscribe(id, (message) => {
+        this.client.unsubscribe(id);
+        resolve(JSON.parse(message));
+      });
+      this.publisher.lPush("MessageToDb_processor", JSON.stringify(message));
+    });
+  }
+  public getRandomClientId() {
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
   }
 }

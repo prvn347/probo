@@ -39,4 +39,19 @@ export class userServices {
       throw new Error(" Error while creating user");
     }
   }
+  async getTransactions(userMeta: { clientId: string; username: string }) {
+    try {
+      console.log("usermeta i s" + userMeta);
+      const transactions = await prisma.transaction.findMany({
+        where: {
+          userId: userMeta.username,
+        },
+      });
+      console.log("transactions" + transactions);
+      return transactions;
+    } catch (error) {
+      console.error(error);
+      throw new Error(" Error while getting user's transactions");
+    }
+  }
 }

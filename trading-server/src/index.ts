@@ -45,7 +45,6 @@ app.post("/user/create/:userId", async (req: Request, res: Response) => {
 
     const clientId = uuidv4();
 
-    // res.cookie("token", result.token, cookieConfig);
     const data = {
       type: "CREATE_USER",
       data: { clientId: clientId, userId: userId },
@@ -54,7 +53,12 @@ app.post("/user/create/:userId", async (req: Request, res: Response) => {
       .getInstance()
       .sendAndAwait(data, clientId);
     console.log(response);
-
+    redisManager.getInstance().sendToDb_processor({
+      type: "CREATE_USER",
+      data: {
+        username: userId,
+      },
+    });
     res.status(201).json({
       response: response.responseData,
     });
@@ -105,7 +109,7 @@ app.post("/event/create", async (req, res) => {
         stockSymbol: symbol,
       },
     };
-    redisManager.getInstance().pushToDb({
+    redisManager.getInstance().sendToDb_processor({
       type: "CREATE_MARKET",
       data: { symbol, endtime, description, source_of_truth, categoryId },
     });
@@ -237,6 +241,21 @@ app.post("/order/buy", async (req, res) => {
         error instanceof Error ? error.message : `Error occurred in /order/buy`,
     });
   }
+});
+
+app.get("/transactions", async (req: Request, res: Response) => {
+  const userId = req.body.userId;
+  const clientId = uuidv4();
+  const response = await redisManager.getInstance().sendToDb_processor({
+    type: "GET_TRANSACTIONS",
+    data: {
+      clientId: clientId,
+      username: userId,
+    },
+  });
+  console.log(response);
+
+  res.json(response.responseData);
 });
 
 app.post("/order/cancel", () => {});

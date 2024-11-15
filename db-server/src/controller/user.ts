@@ -19,4 +19,11 @@ export class userController {
       throw new Error("error while finding user");
     }
   }
+  async getTransactions(userMeta: { clientId: string; username: string }) {
+    try {
+      return await this.userService.getTransactions(userMeta);
+    } catch (error) {
+      throw new Error("error while getting transactions");
+    }
+  }
 }

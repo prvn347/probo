@@ -4,33 +4,15 @@ import { DBmessage, responseType } from "./types";
 import { Order, OrderBook, PriceLevel } from "./types/orderBookType";
 import { stockBalance } from "./types/stockBalanceType";
 import { userBalanceType } from "./types/userBalanceType";
+import fs from "fs";
+import dotenv from "dotenv";
+dotenv.config();
 
 export class engineManager {
-  private INR_BALANCES: userBalanceType = {
-    user5: {
-      balance: 50000000,
-      locked: 0,
-    },
-  };
+  private INR_BALANCES: userBalanceType = {};
   private ORDERBOOK: OrderBook = {};
-  private STOCK_BALANCES: stockBalance = {
-    user5: {
-      "BTC": {
-        yes: {
-          quantity: 400,
-          locked: 0,
-        },
-        no: {
-          quantity: 500,
-          locked: 0,
-        },
-      },
-    },
-  };
+  private STOCK_BALANCES: stockBalance = {};
   private static instance: engineManager;
-
-  constructor() {}
-
   static getInstance() {
     if (!this.instance) {
       this.instance = new engineManager();
@@ -38,6 +20,117 @@ export class engineManager {
 
     return this.instance;
   }
+  constructor() {
+    let snapshot = null;
+    console.log("WITH_SNAPSHOT value:", process.env.WITH_SNAPSHOT);
+    console.log("inside construtor ");
+    try {
+      if (process.env.WITH_SNAPSHOT) {
+        console.log("inside constructor");
+        const fileContent = fs
+          .readFileSync("./src/snapshot.json", "utf-8")
+          .trim();
+        console.log(fileContent);
+        if (fileContent) {
+          snapshot = JSON.parse(fileContent); // Only parse if file is not empty
+        } else {
+          console.log(
+            "snapshot.json is empty, initializing with default values."
+          );
+        }
+      }
+    } catch (e) {
+      console.log("Error reading or parsing snapshot:", e);
+    }
+
+    if (snapshot) {
+      // Initialize ORDERBOOK, STOCK_BALANCES, and INR_BALANCES with parsed data
+      this.ORDERBOOK = this.initializeOrderBook(snapshot.ORDERBOOK);
+      this.STOCK_BALANCES = this.initializeStockBalances(
+        snapshot.STOCK_BALANCES
+      );
+      this.INR_BALANCES = this.initializeInrBalances(snapshot.INR_BALANCES);
+    }
+
+    setInterval(() => {
+      this.saveSnapshot();
+    }, 3000);
+  }
+  private initializeOrderBook(orderBookSnapshot: any): OrderBook {
+    const orderBook: OrderBook = {};
+    for (const symbol in orderBookSnapshot) {
+      const symbolData = orderBookSnapshot[symbol];
+      orderBook[symbol] = {
+        yes: {},
+        no: {},
+      };
+
+      for (const type of ["yes", "no"] as const) {
+        for (const price in symbolData[type]) {
+          const priceLevel = symbolData[type][price];
+          orderBook[symbol][type][price] = {
+            total: priceLevel.total,
+            orders: priceLevel.orders.map((order: any) => ({
+              quantity: order.quantity,
+              userId: order.userId,
+              type: order.type,
+            })),
+          };
+        }
+      }
+    }
+    return orderBook;
+  }
+
+  private initializeStockBalances(stockBalancesSnapshot: any): stockBalance {
+    const stockBalances: stockBalance = {};
+    for (const userId in stockBalancesSnapshot) {
+      const userStocks = stockBalancesSnapshot[userId];
+      stockBalances[userId] = {};
+
+      for (const stockSymbol in userStocks) {
+        const stockPosition = userStocks[stockSymbol];
+        stockBalances[userId][stockSymbol] = {
+          yes: {
+            quantity: stockPosition.yes.quantity,
+            locked: stockPosition.yes.locked,
+          },
+          no: {
+            quantity: stockPosition.no.quantity,
+            locked: stockPosition.no.locked,
+          },
+        };
+      }
+    }
+    return stockBalances;
+  }
+
+  private initializeInrBalances(inrBalancesSnapshot: any): userBalanceType {
+    const inrBalances: userBalanceType = {};
+    for (const userId in inrBalancesSnapshot) {
+      const userBalance = inrBalancesSnapshot[userId];
+      inrBalances[userId] = {
+        balance: userBalance.balance,
+        locked: userBalance.locked,
+      };
+    }
+    return inrBalances;
+  }
+
+  saveSnapshot() {
+    const snapshotData = {
+      ORDERBOOK: this.ORDERBOOK,
+      STOCK_BALANCES: this.STOCK_BALANCES,
+      INR_BALANCES: this.INR_BALANCES,
+    };
+
+    fs.writeFileSync(
+      "./src/snapshot.json",
+      JSON.stringify(snapshotData, null, 2)
+    );
+    console.log(snapshotData);
+  }
+
   public processResponse(response: responseType) {
     switch (response.type) {
       case "CREATE_USER":
@@ -124,9 +217,6 @@ export class engineManager {
         locked: 0,
       };
       this.INR_BALANCES[userData.userId] = initialBalance;
-      const data = { type: "CREATE_USER", data: { username: userData.userId } };
-
-      this.pushToDb(data);
 
       redisManager.getInstance().sendToApi(userData.clientId, {
         clientId: userData.clientId,

@@ -13,10 +13,12 @@ const event: {
   [key: string]: { users: string[]; host?: string };
 } = {};
 
-console.log(process.env.REDIS_HOST + "and " + process.env.REDIS_PORT);
-const client = createClient({
-  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-});
+// console.log(process.env.REDIS_HOST + "and " + process.env.REDIS_PORT);
+const client =
+  createClient();
+  //   {
+  //   url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  // }
 let counter = 0;
 
 const wss = new WebSocketServer({ port: 8080 });

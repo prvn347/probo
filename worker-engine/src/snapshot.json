@@ -1,0 +1,10 @@
+{
+  "ORDERBOOK": {},
+  "STOCK_BALANCES": {},
+  "INR_BALANCES": {
+    "user989": {
+      "balance": 0,
+      "locked": 0
+    }
+  }
+}

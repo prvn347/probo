@@ -3,9 +3,10 @@ import { engineManager } from "./engine";
 import { dbResponseType } from "./types";
 
 const dbProcessor = async () => {
-  const client = createClient({
-    url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
-  });
+  const client = createClient();
+  //   {
+  //   url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  // }
   await client.connect();
   client.on("error", (error) => {
     console.log("Error in redis connection" + error);
@@ -14,7 +15,7 @@ const dbProcessor = async () => {
   console.log("Connected to redis");
   while (true) {
     try {
-      const response = await client.brPop("db_processor", 0);
+      const response = await client.brPop("MessageToDb_processor", 0);
       console.log("order popped");
 
       if (response?.element) {
