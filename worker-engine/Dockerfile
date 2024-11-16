@@ -2,9 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /worker-engine
 
-COPY package*json ./
+COPY ./worker-engine/package*json ./
 RUN  npm install
 
-COPY . .
+COPY ./worker-engine .
 RUN  npm run build
 CMD [ "npm","start" ]

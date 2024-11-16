@@ -2,11 +2,11 @@ FROM node:20-alpine
 
 WORKDIR /db-server
 
-COPY package*.json ./
-COPY prisma ./
+COPY ./db-server/package*.json ./
+COPY ./db-server/prisma ./
 
 RUN npm install
-COPY . .
+COPY ./db-server .
 
 RUN npx prisma generate client
 

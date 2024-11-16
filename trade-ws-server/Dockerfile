@@ -2,11 +2,11 @@ FROM node:20-alpine
 
 WORKDIR /trade-ws-server
 
-COPY package*.json ./
+COPY ./trade-ws-server/package*.json ./
 
 RUN npm install
 
-COPY . .
+COPY ./trade-ws-server .
 
 
 RUN  npm run build

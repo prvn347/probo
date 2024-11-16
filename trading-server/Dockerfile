@@ -2,11 +2,11 @@ FROM node:20-alpine
 
 WORKDIR /backend
 
-COPY package*.json ./
+COPY ./trading-server/package*.json ./
 
 
 RUN npm install
-COPY . .
+COPY ./trading-server .
 
 
 RUN npm run build
