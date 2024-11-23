@@ -4,11 +4,21 @@ import { userBalanceType } from "./types/userBalanceType";
 import { Order, OrderBook } from "./types/orderBookType";
 import { OrderRequestBody, stockBalance } from "./types/stockBalanceType";
 import { redisManager } from "./redisManager";
+import cors from "cors";
 import { v4 as uuidv4 } from "uuid";
+import bcrypt from "bcryptjs";
+import { ErrorReply } from "redis";
+import { generateToken } from "./utils/jwtUtil";
 
 const app: Express = express();
-app.use(express.json());
 
+app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Replace with your React app's URL
+    credentials: true, // If cookies are involved
+  })
+);
 let INR_BALANCES: userBalanceType = {
   user1: { balance: 10, locked: 0 },
   user2: { balance: 200000, locked: 0 },
@@ -39,6 +49,53 @@ app.post("/reset", async (req, res) => {
   }
 });
 
+app.post("/user/signup", async (req: Request, res: Response) => {
+  try {
+    const { username, name, password } = req.body;
+
+
+    const clientId = uuidv4();
+
+    const response = await redisManager
+      .getInstance()
+      .sendToDb_processor(clientId, {
+        type: "CREATE_USER",
+        data: {
+          clientId,
+          username,
+          name,
+          password,
+        },
+      });
+
+    console.log(response);
+    res.status(200).json(response);
+  } catch (error) {
+    res.json(error);
+  }
+});
+app.post("/user/signin", async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    const clientId = uuidv4();
+    const response = await redisManager.getInstance().sendToDb_processor(clientId, {
+      type: "FIND_USER",
+      data: {
+        clientId,
+        username,
+        password,
+      },
+    });
+    if(!response){
+      throw new Error("invalid request")
+    }
+
+    console.log(response);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ error: error });
+  }
+});
 app.post("/user/create/:userId", async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId;
@@ -52,13 +109,7 @@ app.post("/user/create/:userId", async (req: Request, res: Response) => {
     const response = await redisManager
       .getInstance()
       .sendAndAwait(data, clientId);
-    console.log(response);
-    redisManager.getInstance().sendToDb_processor({
-      type: "CREATE_USER",
-      data: {
-        username: userId,
-      },
-    });
+
     res.status(201).json({
       response: response.responseData,
     });
@@ -109,9 +160,16 @@ app.post("/event/create", async (req, res) => {
         stockSymbol: symbol,
       },
     };
-    redisManager.getInstance().sendToDb_processor({
+    redisManager.getInstance().sendToDb_processor(clientId, {
       type: "CREATE_MARKET",
-      data: { symbol, endtime, description, source_of_truth, categoryId },
+      data: {
+        clientId,
+        symbol,
+        endtime,
+        description,
+        source_of_truth,
+        categoryId,
+      },
     });
     const response = await redisManager
       .getInstance()
@@ -246,13 +304,16 @@ app.post("/order/buy", async (req, res) => {
 app.get("/transactions", async (req: Request, res: Response) => {
   const userId = req.body.userId;
   const clientId = uuidv4();
-  const response = await redisManager.getInstance().sendToDb_processor({
-    type: "GET_TRANSACTIONS",
-    data: {
-      clientId: clientId,
-      username: userId,
-    },
-  });
+  const response = await redisManager
+    .getInstance()
+    .sendToDb_processor(clientId, {
+      type: "GET_TRANSACTIONS",
+      data: {
+        clientId: clientId,
+        username: userId,
+      },
+    });
+
   console.log(response);
 
   res.json(response.responseData);

@@ -37,11 +37,11 @@ export class redisManager {
       this.publisher.lPush("message", JSON.stringify(data));
     });
   }
-  public sendToDb_processor(message: any) {
+  public sendToDb_processor( clientId:string,message: any) {
     return new Promise<any>((resolve) => {
-      const id = this.getRandomClientId();
-      this.client.subscribe(id, (message) => {
-        this.client.unsubscribe(id);
+     
+      this.client.subscribe(clientId, (message) => {
+        this.client.unsubscribe(clientId);
         resolve(JSON.parse(message));
       });
       this.publisher.lPush("MessageToDb_processor", JSON.stringify(message));
