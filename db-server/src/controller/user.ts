@@ -1,5 +1,5 @@
 import { userServices } from "../services/user";
-import { userResponse } from "../types/user";
+import { userResponse, userSignin } from "../types/user";
 
 export class userController {
   userService = new userServices();
@@ -11,7 +11,7 @@ export class userController {
       throw new Error("error while creating user");
     }
   }
-  async findUser(userDetail: userResponse) {
+  async findUser(userDetail: userSignin) {
     try {
       return await this.userService.findUser(userDetail);
     } catch (error) {

@@ -34,7 +34,11 @@ export class engineManager {
         this.orderbookController.createSellOrder(dbResponse.data);
         break;
       case "CREATE_USER":
-        this.userController.createUser(dbResponse.data);
+        const result1 =   this.userController.createUser(dbResponse.data);
+        
+        break;
+      case "FIND_USER":
+        this.userController.findUser(dbResponse.data)
         break;
       case "CREATE_MARKET":
         this.stockController.createMarket(dbResponse.data);
