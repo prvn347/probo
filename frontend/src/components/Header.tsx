@@ -1,18 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 
 export function Header() {
-  const [isAuthenticated, setAuthenticated] = useState(false);
+  const [isAuthenticated, setAuthenticated] = useState(true);
+
+  useEffect(()=>{
+    const email =  localStorage.getItem("email")
+    setAuthenticated(email ? true : false) 
+
+
+
+
+  },[])
 
   return (
     <header className="border-b">
-      <div className="container flex items-center justify-between h-16">
-        {isAuthenticated ? (
-          <div className=" flex ">
-            <Button>Trade Online</Button>
-          </div>
-        ) : (
+      <div className="container flex items-center justify-between h-16 px-10">
+        {isAuthenticated ?
+        
           <>
             <div className="flex items-center gap-8">
               <Link className="font-bold text-xl" to={""}>
@@ -35,6 +41,12 @@ export function Header() {
               <span className="font-medium">₹12.6</span>
             </div>
           </>
+         : (
+          <><Link className="font-bold text-xl " to={""}>
+          probo.
+        </Link><div className=" flex ">
+            <Button>Trade Online</Button>
+          </div></>
         )}
       </div>
     </header>

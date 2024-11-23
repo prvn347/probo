@@ -5,10 +5,11 @@ import { Header } from "./components/Header";
 import AuthPage from "./components/Auth";
 import { RecoilRoot } from "recoil";
 import { Home } from "./pages/Home";
+import { EventPage } from "./pages/EventPage";
 
 function App() {
   return (
-    <div className="">
+    <div className=" font-worksans bg-gray-100">
       <RecoilRoot>
       <BrowserRouter>
       <Header />
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Landing/>}  />
           <Route path="/login" element={ <AuthPage/> }  />
           <Route path="/home" element = { <Home/> }/>
+          <Route path="/event" element = {<EventPage/>} />
         </Routes>
       </BrowserRouter></RecoilRoot>
     </div>
