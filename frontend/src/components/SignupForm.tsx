@@ -1,20 +1,35 @@
-'use client'
+
 
 import { useState } from "react"
-import { useFormState } from "react-dom"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { signUp } from "./actions"
+import { createUser } from "@/api"
+import { useNavigate } from "react-router-dom"
 
 export default function SignUpForm() {
-  const [state, formAction] = useFormState(signUp, null)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
+  const navigate = useNavigate()
 
+  const handleSubmit = async (event:React.FormEvent )=>{
+    event.preventDefault();
+    const userMeta = {
+        username,
+        password,
+        name
+    }
+    try {
+        await createUser(userMeta);
+        navigate('/home'); // Navigate to the home page
+      } catch (error) {
+        console.error("Error creating user:", error);
+      }
+    
+  }
   return (
-    <form action={formAction} className="space-y-4 mt-4">
+    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
       <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input
@@ -52,7 +67,6 @@ export default function SignUpForm() {
         />
       </div>
       <Button type="submit" className="w-full">Sign Up</Button>
-      {state && <p className="text-sm text-red-500 mt-2">{state}</p>}
     </form>
   )
 }

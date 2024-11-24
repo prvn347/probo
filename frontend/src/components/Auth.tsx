@@ -21,8 +21,8 @@ export default function Auth() {
       {/* Left side with background */}
       <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-400 to-indigo-600 justify-center items-center">
         <div className="max-w-md text-white p-8">
-          <h1 className="text-4xl font-bold mb-6">Welcome to Our Platform</h1>
-          <p className="text-xl">Discover amazing features and connect with others in our community.</p>
+          <h1 className="text-4xl font-bold mb-6">Welcome to Probo</h1>
+          <p className="text-xl"></p>
         </div>
       </div>
 

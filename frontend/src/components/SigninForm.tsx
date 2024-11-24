@@ -1,19 +1,25 @@
-'use client'
+
 
 import { useState } from "react"
-import { useFormState } from "react-dom"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { signIn } from "./actions"
+import { createUser } from "@/api"
 
 export default function SignInForm() {
-  const [state, formAction] = useFormState(signIn, null)
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const handleSubmit =async () =>{
+    const userMeta = {
+        username,
+        password
+    }
+    // await createUser()
 
-  return (
-    <form action={formAction} className="space-y-4 mt-4">
+  }
+
+  return (  
+    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
       <div className="space-y-2">
         <Label htmlFor="username">Username</Label>
         <Input
@@ -39,7 +45,6 @@ export default function SignInForm() {
         />
       </div>
       <Button type="submit" className="w-full">Sign In</Button>
-      {state && <p className="text-sm text-red-500 mt-2">{state}</p>}
     </form>
   )
 }

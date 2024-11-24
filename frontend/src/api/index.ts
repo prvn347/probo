@@ -1,3 +1,4 @@
+import { UserSignupType } from "@/types";
 import axios, { AxiosInstance } from "axios";
 
 const BASE_URL = "http://localhost:3000";
@@ -7,11 +8,18 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-export const CreateOrGetUser = async (username: string) => {
+export const createUser = async (userMeta: UserSignupType) => {
   try {
-    const user = await axiosInstance.post(`/user/create/${username}`);
+    const response = await axiosInstance.post("/user/signup", userMeta);
+    
+    const resp = response.data
 
-    return user;
+    localStorage.setItem("token",resp.token)
+
+
+     await axiosInstance.post(`/user/create/${resp.result.id}`);
+
+    return response;
   } catch (error) {
     throw new Error("Invalid username");
   }

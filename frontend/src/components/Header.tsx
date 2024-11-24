@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useRecoilValue } from "recoil";
+import { isAuthenticated } from "@/store/atom";
+import { getINRBalance } from "@/api";
 
 export function Header() {
-  const [isAuthenticated, setAuthenticated] = useState(true);
-
+  const isAuthenticatedValue = useRecoilValue(isAuthenticated)
+  const navigate = useNavigate()
   useEffect(()=>{
-    const email =  localStorage.getItem("email")
-    setAuthenticated(email ? true : false) 
-
-
-
-
-  },[])
+    await getINRBalance()
+  })
+ 
 
   return (
     <header className="border-b">
       <div className="container flex items-center justify-between h-16 px-10">
-        {isAuthenticated ?
+        {isAuthenticatedValue ?
         
           <>
             <div className="flex items-center gap-8">
@@ -45,7 +44,9 @@ export function Header() {
           <><Link className="font-bold text-xl " to={""}>
           probo.
         </Link><div className=" flex ">
-            <Button>Trade Online</Button>
+            <Button onClick={()=>{
+              navigate("/login")
+            }}>Trade Online</Button>
           </div></>
         )}
       </div>
