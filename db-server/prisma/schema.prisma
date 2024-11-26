@@ -17,24 +17,18 @@ model User {
 }
 
 model Market {
-  id            String   @id
+    id          String        @id @unique @default(cuid())
+
   symbol        String   @unique
   endTime       DateTime
+  startTime     DateTime
   description   String
   sourceOfTruth String
-  categoryId    String   @unique
+
   createdAt     DateTime @default(now())
-  category      Category @relation(fields: [categoryId], references: [id])
+
 }
 
-model Category {
-  id          String   @id
-  title       String
-  icon        String
-  description String
-  createdAt   DateTime @default(now())
-  Markets     Market?
-}
 
 model Transaction {
   id               String   @id @default(cuid())

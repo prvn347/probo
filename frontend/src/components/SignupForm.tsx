@@ -22,6 +22,7 @@ export default function SignUpForm() {
     }
     try {
         await createUser(userMeta);
+        
         navigate('/home'); // Navigate to the home page
       } catch (error) {
         console.error("Error creating user:", error);

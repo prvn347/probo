@@ -6,20 +6,22 @@ import AuthPage from "./components/Auth";
 import { RecoilRoot } from "recoil";
 import { Home } from "./pages/Home";
 import { EventPage } from "./pages/EventPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <div className=" font-worksans bg-gray-100">
-      <RecoilRoot>
+    <RecoilRoot>
       <BrowserRouter>
-      <Header />
-        <Routes>
-          <Route path="/" element={<Landing/>}  />
-          <Route path="/login" element={ <AuthPage/> }  />
-          <Route path="/home" element = { <Home/> }/>
-          <Route path="/event" element = {<EventPage/>} />
-        </Routes>
-      </BrowserRouter></RecoilRoot>
+        <Header />
+          <Routes>
+            <Route path="/" element={<Landing/>}  />
+            <Route path="/login" element={ <AuthPage/> }  />
+            <Route path="/home" element = { <ProtectedRoute><Home/> </ProtectedRoute>}/>
+            <Route path="/event" element = {<ProtectedRoute><EventPage/></ProtectedRoute>} />
+          </Routes>
+      </BrowserRouter>
+    </RecoilRoot>
     </div>
   );
 }

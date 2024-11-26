@@ -37,6 +37,10 @@ export class engineManager {
         const result1 =   this.userController.createUser(dbResponse.data);
         
         break;
+      case "GET_EVENTS":
+        this.stockController.getMarkets(dbResponse.data)
+        break;
+
       case "FIND_USER":
         this.userController.findUser(dbResponse.data)
         break;

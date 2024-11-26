@@ -11,10 +11,20 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import SignInForm from "./SigninForm";
 import SignUpForm from "./SignupForm";
+import { useEffect } from "react";
+import { useRecoilValue } from "recoil";
+import { isAuthenticated } from "@/store/atom";
+import { useNavigate } from "react-router-dom";
 
 
 
 export default function Auth() {
+  const isAuthenticatedValue = useRecoilValue(isAuthenticated)
+  const navigate = useNavigate()
+  useEffect(()=>{
+    isAuthenticatedValue ? navigate('/home') : null
+
+  },[])
 
 
   return (<div className="flex min-h-screen">

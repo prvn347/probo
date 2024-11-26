@@ -17,7 +17,8 @@ export const createUser = async (userMeta: UserSignupType) => {
     localStorage.setItem("token",resp.token)
 
 
-     await axiosInstance.post(`/user/create/${resp.result.id}`);
+     const url =  await axiosInstance.post(`/user/create/${resp.result.id}`);
+     console.log("has user created "  + url)
 
     return response;
   } catch (error) {
@@ -74,10 +75,18 @@ export const mintStock = async (
   }
 };
 
-export const getINRBalance = async (userId: string) => {
+export const getINRBalance = async () => {
   try {
-    const response = await axiosInstance.get(`/balance/inr/${userId}`);
-    return response.data;
+    const token = localStorage.getItem("token")
+    const response = await axiosInstance.get(`/balance/inr/rs`,{
+
+
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+
+    });
+    return response.data.response;
   } catch (error) {
     throw new Error("Failed to get INR balance");
   }

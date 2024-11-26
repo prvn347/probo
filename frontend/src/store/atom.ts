@@ -7,8 +7,8 @@ export const userBalanceAtom = atom({
     default:0
 })
 
-export const isAuthenticated = atom ({
-    key:"isAuthenticatedAtom",
-  
-    default:localStorage.getItem("token") ? true: false
-})
+    export const isAuthenticated = atom ({
+        key:"isAuthenticatedAtom",
+    
+        default:localStorage.getItem("token") ? true: false
+    })

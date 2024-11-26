@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import { ErrorReply } from "redis";
 import { generateToken } from "./utils/jwtUtil";
+import { AuthRequest, user } from "./middleware/user";
 
 const app: Express = express();
 
@@ -150,7 +151,7 @@ app.post("/onramp/inr", async (req, res) => {
 app.post("/event/create", async (req, res) => {
   try {
     const clientId = uuidv4();
-    const { symbol, endtime, description, source_of_truth, categoryId } =
+    const { symbol, endtime, description, source_of_truth, starttime } =
       req.body;
 
     const data = {
@@ -165,18 +166,17 @@ app.post("/event/create", async (req, res) => {
       data: {
         clientId,
         symbol,
+        starttime,
         endtime,
         description,
         source_of_truth,
-        categoryId,
+      
       },
     });
-    const response = await redisManager
-      .getInstance()
-      .sendAndAwait(data, clientId);
+  
 
     res.status(201).json({
-      response: response.responseData,
+      response: "created",
     });
   } catch (error) {
     res.status(500).json({
@@ -318,7 +318,32 @@ app.get("/transactions", async (req: Request, res: Response) => {
 
   res.json(response.responseData);
 });
+app.get("/events",async (req,res) =>{
 
+  try {
+    const clientId = uuidv4();
+  const response = await redisManager
+    .getInstance()
+    .sendToDb_processor(clientId, {
+      type: "GET_EVENTS",
+      data: {
+        clientId: clientId,
+      },
+    });
+
+  console.log(response);
+
+  res.json(response);
+    
+  } catch (error) {
+    res.status(400).json({
+      error
+    })
+    
+  }
+
+
+})
 app.post("/order/cancel", () => {});
 
 app.get("/balance/inr", async (req, res) => {
@@ -389,9 +414,11 @@ app.get("/orderbook/:stockSymbol", async (req, res) => {
   }
 });
 
-app.get("/balance/inr/:userId", async (req, res) => {
+app.get("/balance/inr/rs",user, async (req:AuthRequest , res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.user;
+    console.log(userId)
+    
     const clientId = uuidv4();
     const data = {
       type: "CHECK_BALANCE",
